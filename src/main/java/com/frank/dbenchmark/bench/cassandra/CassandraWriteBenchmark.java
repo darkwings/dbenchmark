@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.SECONDS)
 public class CassandraWriteBenchmark {
 
+    public static final String KEYSPACE = "apps1";
+
     private CassandraConnector connector;
 
     private KeyspaceRepository keyspaceRepository;
@@ -27,10 +29,11 @@ public class CassandraWriteBenchmark {
         connector = new CassandraConnector();
         connector.connect( "localhost", 9042 );
 
-        String keyspace = "apps";
+        String keyspace = KEYSPACE;
 
         keyspaceRepository = new KeyspaceRepository( connector.getSession() );
-        keyspaceRepository.createKeyspace( keyspace, "SimpleStrategy", 1 );
+        keyspaceRepository.createKeyspace( keyspace,
+                "SimpleStrategy", 1, true );
         keyspaceRepository.useKeyspace( keyspace );
 
         appRepository = new AppRepository( connector.getSession() );
@@ -45,14 +48,14 @@ public class CassandraWriteBenchmark {
 
     @TearDown(Level.Iteration)
     public void tearDown() {
-        keyspaceRepository.deleteKeyspace( "apps" );
+        keyspaceRepository.deleteKeyspace( KEYSPACE );
         connector.close();
     }
 
     @Benchmark
     @Warmup(iterations = 5, time = 5)
     @Measurement(iterations = 5, time = 5)
-    public App writeAggregateSingleStatements() {
+    public App writeAggregate() {
 
         // Simuliamo la scrittura di un App con 2 BlockContainer associati
         // TODO: scrittura in batch

@@ -42,7 +42,7 @@ public class MongoDBWriteBenchmark {
     @Benchmark
     @Warmup(iterations = 5, time = 5)
     @Measurement(iterations = 5, time = 5)
-    public Document writeAggregateSingleStatements() {
+    public Document writeAggregate() {
 
         MongoCollection coll = db.getCollection( collectionName );
         Document tDocument = App.toDocument();

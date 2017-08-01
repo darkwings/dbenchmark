@@ -13,11 +13,16 @@ public class KeyspaceRepository {
         this.session = session;
     }
 
-    public void createKeyspace( String keyspaceName, String replicationStrategy, int numberOfReplicas ) {
-        StringBuilder sb = new StringBuilder( "CREATE KEYSPACE IF NOT EXISTS " ).append( keyspaceName ).append( " WITH replication = {" ).append( "'class':'" ).
+    public void createKeyspace( String keyspaceName,
+                                String replicationStrategy,
+                                int numberOfReplicas, boolean durableWrites ) {
+        StringBuilder sb = new StringBuilder( "CREATE KEYSPACE IF NOT EXISTS " ).
+                append( keyspaceName ).append( " WITH replication = {" ).append( "'class':'" ).
                 append( replicationStrategy ).
                 append( "','replication_factor':" ).
-                append( numberOfReplicas ).append( "};" );
+                append( numberOfReplicas ).append( "} " ).
+                append( " and durable_writes=").append( durableWrites ).
+                append( ";" );
 
         final String query = sb.toString();
 
