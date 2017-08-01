@@ -4,6 +4,7 @@ import com.frank.dbenchmark.model.App;
 import com.frank.dbenchmark.model.BlockContainer;
 import org.openjdk.jmh.annotations.*;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,11 +26,14 @@ public class CassandraWriteBenchmark {
         connector = new CassandraConnector();
         connector.connect( "localhost", 9042 );
 
+        String keyspace = "apps";
+
         keyspaceRepository = new KeyspaceRepository( connector.getSession() );
-        appRepository = new AppRepository( connector.getSession() );
-        blockContainerRepository = new BlockContainerRepository( connector.getSession() );
-        keyspaceRepository.createKeyspace( "apps", "SimpleStrategy", 1 );
-        keyspaceRepository.useKeyspace( "apps" );
+        keyspaceRepository.createKeyspace( keyspace, "SimpleStrategy", 1 );
+        keyspaceRepository.useKeyspace( keyspace );
+
+        appRepository = new AppRepository( connector.getSession(), true );
+        blockContainerRepository = new BlockContainerRepository( connector.getSession(), true );
 
         appRepository.createTable();
         blockContainerRepository.createTable();
@@ -47,7 +51,7 @@ public class CassandraWriteBenchmark {
     public App process() {
 
         // Simuliamo la scrittura di un App con 2 BlockContainer associati
-        // TODO: verificare la possibilità di eseguire questi inserimenti in batch
+        // TODO: scrittura in batch
         App app = App.randomNoBlockContainer();
         BlockContainer bl1 = BlockContainer.random();
         BlockContainer bl2 = BlockContainer.random();

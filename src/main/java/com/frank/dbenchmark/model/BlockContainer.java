@@ -1,7 +1,5 @@
 package com.frank.dbenchmark.model;
 
-import com.frank.dbenchmark.bench.cassandra.KeyGen;
-
 import java.util.*;
 
 /**

@@ -1,5 +1,7 @@
 package com.frank.dbenchmark.bench.cassandra;
 
+import com.datastax.driver.core.BoundStatement;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.frank.dbenchmark.model.App;
 
@@ -14,8 +16,16 @@ public class AppRepository {
 
     private Session session;
 
+    private boolean prepared = false;
+    private PreparedStatement stmt;
+
     public AppRepository( Session session ) {
+        this( session, false );
+    }
+
+    public AppRepository( Session session, boolean prepared ) {
         this.session = session;
+        this.prepared = prepared;
     }
 
     public void createTable() {
@@ -28,16 +38,35 @@ public class AppRepository {
 
         final String query = sb.toString();
         session.execute( query );
+
+        if ( prepared ) {
+            System.out.println("AppRepository: Prepare Statement");
+            prepare();
+        }
     }
 
     public void insertApp( App app ) {
-        StringBuilder sb = new StringBuilder("INSERT INTO ").append(TABLE_NAME).
-                append("(id, creator, description) ").append("VALUES ('").
-                append(app.getId()).append("', '").
-                append(app.getCreator()).append("', '").
-                append(app.getDescription()).append("');");
+        if ( prepared ) {
+            BoundStatement bound = stmt.bind();
+            bound.setString( 0, app.getId() );
+            bound.setString( 1, app.getCreator() );
+            bound.setString( 2, app.getDescription() );
+            session.execute( bound );
+        }
+        else {
+            StringBuilder sb = new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
+                    append( "(id, creator, description) " ).append( "VALUES ('" ).
+                    append( app.getId() ).append( "', '" ).
+                    append( app.getCreator() ).append( "', '" ).
+                    append( app.getDescription() ).append( "');" );
 
-        final String query = sb.toString();
-        session.execute(query);
+            final String query = sb.toString();
+            session.execute( query );
+        }
+    }
+
+    public void prepare() {
+        stmt = session.prepare( new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
+                append( "(id, creator, description) " ).append( "VALUES (?,?,?)" ).toString() );
     }
 }

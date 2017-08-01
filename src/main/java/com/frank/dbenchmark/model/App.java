@@ -1,11 +1,9 @@
 package com.frank.dbenchmark.model;
 
-import com.frank.dbenchmark.bench.cassandra.KeyGen;
 import org.bson.Document;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 
 /**
