@@ -46,12 +46,14 @@ public class CassandraWriteBenchmark {
     @Measurement(iterations = 5, time = 5)
     public App process() {
 
+        // Simuliamo la scrittura di un App con 2 BlockContainer associati
+        // TODO: verificare la possibilità di eseguire questi inserimenti in batch
         App app = App.randomNoBlockContainer();
-//        BlockContainer bl1 = BlockContainer.random();
-//        BlockContainer bl2 = BlockContainer.random();
+        BlockContainer bl1 = BlockContainer.random();
+        BlockContainer bl2 = BlockContainer.random();
         appRepository.insertApp( app );
-//        blockContainerRepository.insertBlockContainer( bl1, app.getId() );
-//        blockContainerRepository.insertBlockContainer( bl2, app.getId() );
+        blockContainerRepository.insertBlockContainer( bl1, app.getId() );
+        blockContainerRepository.insertBlockContainer( bl2, app.getId() );
         return app;
     }
 }
