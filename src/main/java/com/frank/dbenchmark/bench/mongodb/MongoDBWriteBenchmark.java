@@ -1,6 +1,7 @@
 package com.frank.dbenchmark.bench.mongodb;
 
 import com.frank.dbenchmark.model.App;
+import com.frank.dbenchmark.model.Event;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -30,7 +31,6 @@ public class MongoDBWriteBenchmark {
 
         mongoClient = new MongoClient( "localhost", 27017 );
         db = mongoClient.getDatabase( "dbtest" );
-//        db.createCollection( collectionName );
     }
 
     @TearDown(Level.Iteration)
@@ -42,10 +42,20 @@ public class MongoDBWriteBenchmark {
     @Benchmark
     @Warmup(iterations = 5, time = 5)
     @Measurement(iterations = 5, time = 5)
-    public Document process() {
+    public Document writeAggregateSingleStatements() {
 
         MongoCollection coll = db.getCollection( collectionName );
         Document tDocument = App.toDocument();
+        coll.insertOne( tDocument );
+        return tDocument;
+    }
+
+    @Benchmark
+    @Warmup(iterations = 5, time = 5)
+    @Measurement(iterations = 5, time = 5)
+    public Document writeEvent() {
+        MongoCollection coll = db.getCollection( collectionName );
+        Document tDocument = Event.toDocument();
         coll.insertOne( tDocument );
         return tDocument;
     }

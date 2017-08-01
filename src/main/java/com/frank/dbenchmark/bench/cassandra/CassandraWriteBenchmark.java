@@ -2,9 +2,9 @@ package com.frank.dbenchmark.bench.cassandra;
 
 import com.frank.dbenchmark.model.App;
 import com.frank.dbenchmark.model.BlockContainer;
+import com.frank.dbenchmark.model.Event;
 import org.openjdk.jmh.annotations.*;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,6 +19,7 @@ public class CassandraWriteBenchmark {
 
     private KeyspaceRepository keyspaceRepository;
     private AppRepository appRepository;
+    private EventRepository eventRepository;
     private BlockContainerRepository blockContainerRepository;
 
     @Setup(Level.Iteration)
@@ -32,11 +33,14 @@ public class CassandraWriteBenchmark {
         keyspaceRepository.createKeyspace( keyspace, "SimpleStrategy", 1 );
         keyspaceRepository.useKeyspace( keyspace );
 
-        appRepository = new AppRepository( connector.getSession(), true );
-        blockContainerRepository = new BlockContainerRepository( connector.getSession(), true );
+        appRepository = new AppRepository( connector.getSession() );
+        blockContainerRepository = new BlockContainerRepository( connector.getSession() );
+        eventRepository = new EventRepository( connector.getSession() );
 
         appRepository.createTable();
         blockContainerRepository.createTable();
+        eventRepository.createTable();
+
     }
 
     @TearDown(Level.Iteration)
@@ -48,7 +52,7 @@ public class CassandraWriteBenchmark {
     @Benchmark
     @Warmup(iterations = 5, time = 5)
     @Measurement(iterations = 5, time = 5)
-    public App process() {
+    public App writeAggregateSingleStatements() {
 
         // Simuliamo la scrittura di un App con 2 BlockContainer associati
         // TODO: scrittura in batch
@@ -60,4 +64,14 @@ public class CassandraWriteBenchmark {
         blockContainerRepository.insertBlockContainer( bl2, app.getId() );
         return app;
     }
+
+    @Benchmark
+    @Warmup(iterations = 5, time = 5)
+    @Measurement(iterations = 5, time = 5)
+    public Event writeEvent() {
+        Event event = Event.random();
+        eventRepository.insertEvent( event );
+        return event;
+    }
+
 }

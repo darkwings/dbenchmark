@@ -4,21 +4,20 @@ import com.datastax.driver.core.BoundStatement;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 import com.frank.dbenchmark.model.App;
+import com.frank.dbenchmark.model.Event;
 
 /**
  * @author ftorriani
  */
-public class AppRepository {
+public class EventRepository {
 
-    private static final String TABLE_NAME = "app";
-
-    private static final String TABLE_NAME_BY_TITLE = TABLE_NAME + "ByTitle";
+    private static final String TABLE_NAME = "event";
 
     private Session session;
 
     private PreparedStatement stmt;
 
-    public AppRepository( Session session ) {
+    public EventRepository( Session session ) {
         this.session = session;
     }
 
@@ -27,31 +26,30 @@ public class AppRepository {
                 new StringBuilder( "CREATE TABLE IF NOT EXISTS " ).
                         append( TABLE_NAME ).
                         append( "(" ).append( "id text PRIMARY KEY, " ).
-                        append( "creator text," ).
-                        append( "description text)" );
+                        append( "type text," ).
+                        append( "time bigint)" );
 
         final String query = sb.toString();
         session.execute( query );
 
         stmt = session.prepare( new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
-                append( "(id, creator, description) " ).append( "VALUES (?,?,?)" ).toString() );
-
+                append( "(id, type, time) " ).append( "VALUES (?,?,?)" ).toString() );
     }
 
-    public void insertApp( App app ) {
+    public void insertEvent( Event app ) {
 //        if ( prepared ) {
-            BoundStatement bound = stmt.bind();
-            bound.setString( 0, app.getId() );
-            bound.setString( 1, app.getCreator() );
-            bound.setString( 2, app.getDescription() );
-            session.execute( bound );
+        BoundStatement bound = stmt.bind();
+        bound.setString( 0, app.getId() );
+        bound.setString( 1, app.getType() );
+        bound.setLong( 2, app.getTime() );
+        session.execute( bound );
 //        }
 //        else {
 //            StringBuilder sb = new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
-//                    append( "(id, creator, description) " ).append( "VALUES ('" ).
+//                    append( "(id, type, time) " ).append( "VALUES ('" ).
 //                    append( app.getId() ).append( "', '" ).
-//                    append( app.getCreator() ).append( "', '" ).
-//                    append( app.getDescription() ).append( "');" );
+//                    append( app.getType() ).append( "', " ).
+//                    append( app.getTime() ).append( ");" );
 //
 //            final String query = sb.toString();
 //            session.execute( query );
@@ -60,6 +58,6 @@ public class AppRepository {
 
 //    public void prepare() {
 //        stmt = session.prepare( new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
-//                append( "(id, creator, description) " ).append( "VALUES (?,?,?)" ).toString() );
+//                append( "(id, type, time) " ).append( "VALUES (?,?,?)" ).toString() );
 //    }
 }

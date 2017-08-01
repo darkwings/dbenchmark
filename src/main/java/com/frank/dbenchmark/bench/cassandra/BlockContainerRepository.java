@@ -13,21 +13,12 @@ public class BlockContainerRepository {
 
     private static final String TABLE_NAME = "blockContainer";
 
-    private static final String TABLE_NAME_BY_TITLE = TABLE_NAME + "ByTitle";
-
     private Session session;
 
-    private boolean prepared = false;
     private PreparedStatement stmt;
 
     public BlockContainerRepository( Session session ) {
-
-        this( session, false );
-    }
-
-    public BlockContainerRepository( Session session, boolean prepared ) {
         this.session = session;
-        this.prepared = prepared;
     }
 
     public void createTable() {
@@ -41,30 +32,28 @@ public class BlockContainerRepository {
         final String query = sb.toString();
         session.execute( query );
 
-        if ( prepared ) {
-            System.out.println("BlockContainerRepository: Prepare Statement");
-            prepare();
-        }
+        stmt = session.prepare( new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
+                append( "(id, app_id, description) " ).append( "VALUES (?,?,?)" ).toString() );
     }
 
     public void insertBlockContainer( BlockContainer bl, String appId ) {
-        if ( prepared ) {
+//        if ( prepared ) {
             BoundStatement bound = stmt.bind();
             bound.setString( 0, bl.getId() );
             bound.setString( 1, appId );
             bound.setString( 2, bl.getDescription() );
             session.execute( bound );
-        }
-        else {
-            StringBuilder sb = new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
-                    append( "(id, app_id, description) " ).append( "VALUES ('" ).
-                    append( bl.getId() ).append( "', '" ).
-                    append( appId ).append( "', '" ).
-                    append( bl.getDescription() ).append( "');" );
-
-            final String query = sb.toString();
-            session.execute( query );
-        }
+//        }
+//        else {
+//            StringBuilder sb = new StringBuilder( "INSERT INTO " ).append( TABLE_NAME ).
+//                    append( "(id, app_id, description) " ).append( "VALUES ('" ).
+//                    append( bl.getId() ).append( "', '" ).
+//                    append( appId ).append( "', '" ).
+//                    append( bl.getDescription() ).append( "');" );
+//
+//            final String query = sb.toString();
+//            session.execute( query );
+//        }
     }
 
     public void prepare() {
